@@ -10,7 +10,9 @@ Other code is subject to the original authors and release license.
 
 # Similar software
 Drivewire for the Color Computer https://sites.google.com/site/drivewire4/
+
 APE for the Altair http://ape.classiccmp.org/
+
 FDC+ https://deramp.com/fdc_plus.html
 
 # If these exist, why create another one?
@@ -19,23 +21,28 @@ APE and FDC+'s software is Windows only. APE requires two serial ports, and FDC+
 
 # What hardware is used
 
-Right now everything is coded to use the s100computers.com Serial IO board USB port because this is what I use. It would be straightforward to modify the software for other serial connections like a 2SIO card. Its basically just modifying the status and data ports, plus how to interpret the status flags.
+Right now everything is coded to use the s100computers.com Serial IO board USB port because this is what I have. It would be straightforward to modify the software for other serial cards like a 2SIO card.
 
 # Quick start
 
 Enter the firststage.rom code into the front panel of the Altair at address 0. The code is:
+
+```
 041 160 077 061 022 000 333 252 007 330 333 254 275 310 055 167
 300 351 003 000
+```
 
 Reset and execute from address 0.
 
 Run ./serialdrive.py /dev/ttyUSB0 (replace with your appropriate serial device). In serialdrive hit ctrl-] and enter 'sendsbl' to send the sbl.tap file. CPM should now boot up:
 
-   CP/M2 on Altair
-   48K Vers 2.20  
-   (c) 1981 Lifeboat Associates
-   Modified 2022 Don Barber for Disk-over-Serial
-   A>
+```
+CP/M2 on Altair
+48K Vers 2.20  
+(c) 1981 Lifeboat Associates
+Modified 2022 Don Barber for Disk-over-Serial
+A>
+```
 
 Congrats!
 
@@ -51,9 +58,7 @@ I used the zasm assembler to build the software. Conceptually you could use any 
 
 ## Build the CPM disk image
 
-First create the cpm virtual disk. Move the LIFEBOAT-CPM22-48K.DSK into the cpm directory. Enter the directory and execute ./makeserialcpm.sh, adjusting paths as needed. You'll find a serialcpm.dsk produces. Move this into the serialdrive directory.
-
-This is a 48k version of CPM; you can use standard MOVCPM/SYSGEN tooling to resize CPM later; see the CPM manuals.
+First create the cpm virtual disk. Move the LIFEBOAT-CPM22-48K.DSK into the cpm directory. Enter the directory and execute ./makeserialcpm.sh, adjusting paths as needed. If it all works, you'll end up with serialcpm.dsk. Move this into the serialdrive directory.
 
 ## Build the bootloader 'tape' image
 
@@ -109,9 +114,9 @@ This will send a ctrl-].
 
 # DSGET and DSPUT
 
-These software programs are loaded onto the CPM disk. They initiate xmodem send and recieve to exchange files with the host system. They send escape codes that will automatically trigger the appropriate xmodem calls inside serialdrive.py so you won't have to use the menu options of 'xsend' or 'xget.' Just run DSGET.COM or DSPUT.COM inside of CPM.
+These software programs are loaded onto the CPM disk. They initiate xmodem send and recieve to exchange files with the host system. They send escape codes that will automatically trigger the appropriate xmodem calls inside serialdrive.py so you won't have to use the menu options of 'xsend' or 'xget.' Just run DSGET.COM <file> or DSPUT.COM <file> inside of CPM.
 
-These are slight modifications of Mike Douglas's PCGET/PCPUT software.
+These are minor modifications of Mike Douglas's PCGET/PCPUT software.
 
 # But I have more memory than 48k!
 
