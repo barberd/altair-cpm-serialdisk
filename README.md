@@ -50,7 +50,7 @@ Congrats!
 
 ## Prereqs
 
-You'll need a copy of Lifeboat CPM 2.2. Grab LIFEBOAT-CPM22-48K.DSK from https://deramp.com/downloads/altair/software/8_inch_floppy/CPM/CPM%202.2/Lifeboat%20CPM/
+You'll need a copy of Lifeboat CPM 2.2. Grab LIFEBOAT-CPM22-48K.DSK from https://deramp.com/downloads/altair/software/8_inch_floppy/CPM/CPM%202.2/Lifeboat%20CPM/. Thanks to deramp.com for making this archive available.
 
 You'll also need a copy of my altair2cpmraw scripts to build the images. Grab it at https://github.com/barberd/altair2cpmraw. You'll need to add the appropriate altaircpmraw diskdefs to your system.
 
@@ -58,7 +58,7 @@ I used the zasm assembler to build the software. Conceptually you could use any 
 
 ## Build the CPM disk image
 
-First create the cpm virtual disk. Move the LIFEBOAT-CPM22-48K.DSK into the cpm directory. Enter the directory and execute ./makeserialcpm.sh, adjusting paths as needed. If it all works, you'll end up with serialcpm.dsk. Move this into the serialdrive directory.
+Move the LIFEBOAT-CPM22-48K.DSK into the cpm directory. Enter the directory and execute ./makeserialcpm.sh, adjusting paths as needed. If it all works, you'll end up with serialcpm.dsk. Move this into the serialdrive directory.
 
 ## Build the bootloader 'tape' image
 
@@ -66,7 +66,7 @@ Next, go into the bootloader directory and run ./build.sh. This will produce two
 
 ## Start up the serialdrive software
 
-Next, go into the serialdrive directory and run ./serialdrive.py and see what modules you need to install, such as 'serial' and 'xmodem.' Install them either from your chosen distribution or by using pip.
+Next, go into the serialdrive directory and run ./serialdrive.py and see what modules you need to install, such as 'serial' and 'xmodem.' Install them either from your chosen distribution or by using pip. When all set, start it up with `./serialdrive.py /dev/ttyUSB0` adjusting the serial device as appropriate.
 
 # Using serialdrive
 
@@ -116,7 +116,7 @@ This will send a ctrl-].
 
 These software programs are loaded onto the CPM disk. They initiate xmodem send and recieve to exchange files with the host system. They send escape codes that will automatically trigger the appropriate xmodem calls inside serialdrive.py so you won't have to use the menu options of 'xsend' or 'xget.' Just run DSGET.COM <file> or DSPUT.COM <file> inside of CPM.
 
-These are minor modifications of Mike Douglas's PCGET/PCPUT software.
+These are minor modifications of Mike Douglas's PCGET/PCPUT software; credit goes to him.
 
 # But I have more memory than 48k!
 
