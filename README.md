@@ -1,5 +1,5 @@
 # altair-cpm-serialdisk
-Modifications for Lifeboat CPM 2.2 to run on the Altair 8800 using a virtual floppy drive accessed over serial from a modern PC, accompanying software.
+Modifications for Lifeboat CPM 2.2 to run on the Altair 8800 using a virtual floppy drive accessed over serial from a modern PC and matching software for the PC side.
 
 The Altair 8800 had a few options for long term mass storage; the 8" floppy was one of the most common. These are hard to find and maintain today. This software allows to keep disk images on a PC and access them over a serial connection, either rs232 or USB.
 
