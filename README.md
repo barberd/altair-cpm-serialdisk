@@ -6,7 +6,10 @@ The Altair 8800 had a few options for long term mass storage; the 8" floppy was 
 # License
 
 Original code by Don Barber is licensed under GPL version 3.
-Other code is subject to the original authors and release license.
+
+CPM Code is effectively public domain; see http://cpm.z80.de/license.html for specifics.
+
+Other code is subject to the original authors copyrights and their respective licenses.
 
 # Similar software
 Drivewire for the Color Computer https://sites.google.com/site/drivewire4/
