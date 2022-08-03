@@ -73,6 +73,7 @@ RECEIVE$FILE:
 	CALL	ERASE$OLD$FILE
 	CALL	MAKE$NEW$FILE
 
+#if defined(USBDATA)
 OWAIT0: IN	USBSTAT
 	ANI	040h
 	JNZ	OWAIT0
@@ -83,6 +84,19 @@ OWAIT1: IN	USBSTAT
 	JNZ	OWAIT1
 	MVI	A,013h
 	OUT	USBDATA
+#else
+OWAIT0: IN	16
+	ANI	02h
+	JZ	OWAIT0
+	MVI	A,0FFh
+	OUT	17
+OWAIT1: IN	16
+	ANI	02h
+	JZ	OWAIT1
+	MVI	A,013h
+	OUT	17
+#endif
+
 	MVI	A,NAK
 	CALL	SEND		;SEND NAK
 
@@ -254,11 +268,17 @@ MSEC	;push	b		;save BC and HL for BDOS call to check
 	
 noAbort	lxi	d,(160 shl 8)	;50 cycles, 6.25ms/wrap*160=1s
 
-MWTI	IN	USBSTAT
+MWTI
+
+#if defined(USBDATA)
+	IN	USBSTAT
 	ANI	080h
-	NOP
-	NOP
 	JZ	MCHAR		;GOT CHAR
+#else
+	IN	16
+	ANI	01h
+	JNZ	MCHAR		;GOT CHAR
+#endif
 
 	DCR	E		;COUNT DOWN
 	JNZ	MWTI		;FOR TIMEOUT
@@ -276,7 +296,13 @@ MWTI	IN	USBSTAT
 
 ;GOT MODEM CHAR
 
-MCHAR	IN	USBDATA
+MCHAR	
+
+#if defined(USBDATA)
+	IN	USBDATA
+#else
+	IN	17
+#endif
 	POP	D		;RESTORE DE
 	PUSH	PSW		;CALC CHECKSUM
 	ADD	C
@@ -293,15 +319,32 @@ SEND	PUSH	PSW		;CHECK IF MONITORING OUTPUT
 	ADD	C		;CALC CKSUM
 	MOV	C,A
 
-sndwt	IN	USBSTAT
+sndwt	
+
+#if defined(USBDATA)
+	IN	USBSTAT
 	ANI	040h
 	JNZ	sndwt
+#else
+	IN	16
+	ANI	02h
+	JZ	sndwt
+#endif
 	POP	PSW		;GET CHAR
 
-sndSDR	OUT	USBDATA
+sndSDR	
+#if defined(USBDATA)
+	OUT	USBDATA
+#else
+	OUT	17
+#endif
 	CPI	0FFh
 	jnz	snddone
+#if defined(USBDATA)
 	OUT	USBDATA		; if sending 0FFh then send twice	
+#else
+	OUT	17
+#endif
 snddone
 	RET
 

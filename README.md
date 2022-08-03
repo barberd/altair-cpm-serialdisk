@@ -59,6 +59,12 @@ You'll also need a copy of my altair2cpmraw scripts to build the images. Grab it
 
 I used the zasm assembler to build the software. Conceptually you could use any 8080 assembler, but might have to make minor syntax changes. Zasm is available from https://k1.spdns.de/Develop/Projects/zasm/Distributions/.
 
+## Choose your IO card
+
+Right now the firstboot.asm, loader2.asm, sbl.asm, boot.asm, bios.asm, and user.asm files are all coded for the s100computers.com Serial IO Card USB port.
+
+By commenting out the USBDATA equate in the files, code for the MITS 2-SIO card with ioport 16 and 17 is used instead.
+
 ## Build the CPM disk image
 
 Move the LIFEBOAT-CPM22-48K.DSK into the cpm directory. Enter the directory and execute ./makeserialcpm.sh, adjusting paths as needed. If it all works, you'll end up with serialcpm.dsk. Move this into the serialdrive directory.
@@ -133,5 +139,4 @@ Um...probably. It might require a slight modification to serialdrive.py's use of
 
 The menu could use several improvements. For example, there is no error checking that disk files actually exist.
 
-Right now the firstboot.asm, loader2.asm, sbl.asm, boot.asm, bios.asm, and user.asm files are all coded for the s100computers.com Serial IO Card USB port. It would be trivial to add 'ifdef' type statements to accommodate other serial cards such as the original MITS SIO and 2SIO cards.
 

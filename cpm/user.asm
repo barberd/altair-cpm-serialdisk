@@ -199,6 +199,7 @@ PTRIST:
 TTYIST:
 	; Console input status routine.
 	; Return 0FFH if char ready, 0 if not.
+#if defined(USBDATA)
 	IN	USBSTAT
 	ANI	80H
 	JNZ	NOCHARI		; No key was pressed
@@ -206,19 +207,39 @@ TTYIST:
 	RET
 NOCHARI	MVI	A,0
 	RET
+#else
+	XRA     A
+        IN      TISPT           ; "1" Read status port
+        CMA                     ; Adjust sense
+        ANI     TDAMSK          ; "2" Mask status bits
+        XRI     TDAFLG          ; "3" Hardware sense
+        RZ                      ; No key was pressed
+        MVI     A,0FFH          ; Char is ready
+        RET
+#endif
 
 TTYIN:
 	; Console input char to register A.
+#if defined(USBDATA)
 	CALL	TTYIST		; Is char ready?
 	JNZ	TTYIN		; Not yet
 	IN	USBDATA
 	ANI	7FH		; Strip parity
 	RET
+#else
+	CALL    TTYIST          ; Is char ready?
+        JZ      TTYIN           ; Not yet
+        XRA     A
+        IN      TDIPT           ; "4" Read data port
+        ANI     7FH             ; Strip parity
+        RET
+#endif
 
 PTROST:
 TTYOST:
 	; Console output status routine.
 	; Ret 0FFH if ready for output, 0 if not.
+#if defined(USBDATA)
 	IN	USBSTAT
 	ANI	40H
 	JNZ	NOCHARO
@@ -226,15 +247,32 @@ TTYOST:
 	RET
 NOCHARO:MVI	A,0
 	RET
+#else
+        XRA     A
+        IN      TOSPT           ; "5" Read status port
+        CMA                     ; Adjust sense
+        ANI     TBEMSK          ; "6" Mask status bits
+        XRI     TBEFLG          ; "7" Hardware sense
+        RZ                      ; Not ready
+        MVI     A,0FFH          ; Ready for output
+        RET
+#endif
 
 RAWOUT:
 	; Console output char from register C.
+#if defined(USBDATA)
 	CALL	TTYOST		; Ready to output?
 	JNZ	RAWOUT		; Wait until not busy
 	MOV	A,C		; Char into accumulator
 	OUT	USBDATA		; "8" Output char
-
 	RET
+#else
+        CALL    TTYOST          ; Ready to output?
+        JZ      TTYOUT          ; Wait until not busy
+        MOV     A,C             ; Char into accumulator
+        OUT     TDOPT           ; "8" Output char
+        RET
+#endif
 
 TTYOUT:
 	CALL	RAWOUT
@@ -375,17 +413,22 @@ CINITR:
 	; of length "L" usually begins at "S" below.
 	; In this case, initialization is for 88-2SIO.
 STRING:				; "S"
-	;MVI	A,3		; RESET 6850
-	;OUT	16		; PROGRAM FOR 8 BITS
-	;OUT	18
-	;MVI	A,15H		; 1STOP,NOPARITY, 16X CLOCK
+
+#if defined(USBDATA)
+
+#else
+	MVI	A,3		; RESET 6850
+	OUT	16		; PROGRAM FOR 8 BITS
+	OUT	18
+	MVI	A,15H		; 1STOP,NOPARITY, 16X CLOCK
 				; NOTE: 2 STOP BITS=11H
-	;OUT	16
-	;OUT	18
-	;IN	17		; CLEAR
-	;IN	17		; INPUT
-	;IN	19		; BUFFER
-	;IN	19
+	OUT	16
+	OUT	18
+	IN	17		; CLEAR
+	IN	17		; INPUT
+	IN	19		; BUFFER
+	IN	19
+#endif
 	RET			; DONE
 
 STRLEN	EQU	$-STRING	; "L"

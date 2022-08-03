@@ -20,8 +20,8 @@
 ;
 ;  Serial Port Equates
 
-USBSTAT	EQU	0AAh
-USBDATA	EQU	0ACh
+;USBSTAT	EQU	0AAh
+;USBDATA	EQU	0ACh
 
 ERRLMT  EQU     5               ;MAX ALLOWABLE ERRORS
 
@@ -82,6 +82,7 @@ purge	MVI	B,1		;times out after 1 second if no data
 lineClr	xra	a		;clear crc flag = checksum mode
 	sta	crcFlag
 
+#if defined(USBDATA)
 OWAIT0: IN	USBSTAT		;tell CPM disk-over-serial agent
 	ANI	040h            ;to start up xmodem to receive file
 	JNZ	OWAIT0
@@ -92,6 +93,18 @@ OWAIT1: IN	USBSTAT
 	JNZ	OWAIT1
 	MVI	a,012h
 	OUT	USBDATA
+#else
+OWAIT0: IN	16		;tell CPM disk-over-serial agent
+	ANI	002h            ;to start up xmodem to receive file
+	JZ	OWAIT0
+	MVI	a,0FFh
+	OUT	17
+OWAIT1: IN	16
+	ANI	02h
+	JZ	OWAIT1
+	MVI	a,012h
+	OUT	17
+#endif
 
 ; WAIT FOR INITIAL NAK, THEN SEND THE FILE
 	
@@ -207,9 +220,16 @@ ERXIT	POP	D		;GET MESSAGE
 RECV	PUSH	D		;SAVE
 MSEC	lxi	d,(124shl 8)	;63 cycles, 8.064ms/wrap*124=1s (2MHz)
 
-MWTI	IN	USBSTAT		;(10)
+MWTI	
+#if defined(USBDATA)
+	IN	USBSTAT		;(10)
 	ANI	080h		;(7)
 	JZ	MCHAR		;(10) GOT CHAR
+#else
+	IN	16		;(10)
+	ANI	001h		;(7)
+	JNZ	MCHAR		;(10) GOT CHAR
+#endif
 
 ; no character present, decrement timeout
 
@@ -231,7 +251,12 @@ MWTI	IN	USBSTAT		;(10)
 
 ;GOT MODEM CHAR
 
-MCHAR	IN	USBDATA
+MCHAR	
+#if defined(USBDATA)
+	IN	USBDATA
+#else
+	IN	17
+#endif
 	POP	D		;RESTORE DE
 	PUSH	PSW		;CALC CHECKSUM
 	ADD	C
@@ -248,16 +273,31 @@ SEND	PUSH	PSW		;CHECK IF MONITORING OUTPUT
 	ADD	C		;CALC CKSUM
 	MOV	C,A
 
-SENDW	IN	USBSTAT
+SENDW	
+#if defined(USBDATA)
+	IN	USBSTAT
 	ANI	040h
 	JNZ	SENDW
+#else
+	IN	16
+	ANI	02h
+	JZ	SENDW
+#endif
 
 	POP	PSW		;GET CHAR
 
+#if defined(USBDATA)
 	OUT	USBDATA
+#else
+	OUT	17
+#endif
 	CPI	0FFh
 	JNZ	snddone
+#if defined(USBDATA)
         OUT	USBDATA		; send second 0xFF to BIOS
+#else
+        OUT	17		; send second 0xFF to BIOS
+#endif
 snddone	RET
 
 ;

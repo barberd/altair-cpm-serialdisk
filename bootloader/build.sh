@@ -6,5 +6,5 @@ zasm -w --asm8080 sbl.asm
 ./maketape.py
 ./testcollision.py
 
-Use this as the bootstrap entered into the front panel:
+echo Use this as the bootstrap entered into the front panel:
 od -b firststage.rom

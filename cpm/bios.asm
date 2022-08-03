@@ -571,7 +571,7 @@ rdExit	pop	b
 
 rdPSec	
 
-
+#if defined(USBDATA)
 OWAIT1: IN      USBSTAT         ;READY TO WRITE?
         ANI     40H             ;READY
         JNZ     OWAIT1
@@ -618,6 +618,55 @@ rdLoop	in	USBSTAT		;get drive status byte
 	jnz	rdLoop
 	
 	in	USBDATA		;read the byte
+#else
+OWAIT1: IN      16      	;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ      OWAIT1
+        MVI     A,0FFH           ;send not-the-console command
+        OUT     17
+
+	CALL	flSer		; flush buffer
+
+OWAIT2: IN      16  	        ;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ      OWAIT2
+        MVI     A,10H           ;send disk read
+        OUT     17
+
+OWAIT3: IN      16	         ;READY TO WRITE?
+        ANI     02H              ;READY
+        JZ      OWAIT3
+	LDA	diskNum		;set diskNum
+        OUT     17
+
+OWAIT4: IN      16	         ;READY TO WRITE?
+        ANI     02H              ;READY
+        JZ      OWAIT4
+        LDA     trkNum           ;set track num
+        OUT     17
+
+OWAIT5: IN      16	         ;READY TO WRITE?
+        ANI     02H              ;READY
+        JZ     OWAIT5
+	MOV	a,e		;set sector
+        OUT     17
+
+RWAIT:  IN      16         ;DATA READY TO READ?
+        ANI     01H             ;READY
+        JZ      RWAIT
+        IN      17         ;GET STATUS BYTE
+	ORA	A
+        JNZ	rBad		;IF NOT 0 THEN ERROR
+
+	mvi	c,ALTLEN	;C=length of Altair sector (137 bytes)
+	
+rdLoop	in	16		;get drive status byte
+	ani	01H		;wait for RXE
+	jz	rdLoop
+	
+	in	17		;read the byte
+#endif
+
 	mov	m,a		;store in the read buffer
 	inx	h		;increment buffer pointer
 	dcr	c		;decrement characters remaining in counter
@@ -714,6 +763,7 @@ setHCS	mov	a,c		;A=track number
 
 wtWrSec	
 
+#if defined(USBDATA)
 WWAIT1: IN      USBSTAT
         ANI     40H
         JNZ     WWAIT1
@@ -745,6 +795,39 @@ WWAIT5: IN      USBSTAT         ;READY TO WRITE?
         JNZ     WWAIT5
 	MOV	a,e 		;set sector
         OUT     USBDATA
+#else
+WWAIT1: IN      16
+        ANI     02H
+        JZ	WWAIT1
+        MVI     A,0FFH           ;send the not-the-console-command
+        OUT     17
+
+	CALL	flSer		;flush buffer
+
+WWAIT2: IN      16	        ;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ	WWAIT2
+        MVI	A,11H           ;send disk write
+        OUT	17
+
+WWAIT3: IN      16 	        ;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ      WWAIT3
+	LDA	diskNum	        ;set disk
+        OUT     17
+
+WWAIT4: IN      16	         ;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ      WWAIT4
+        LDA     trkNum          ;set track num
+        OUT     17
+
+WWAIT5: IN      16         ;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ      WWAIT5
+	MOV	a,e 		;set sector
+        OUT     17
+#endif
 
 	lxi	h,altBuf	;HL->altair sector buffer
 	lxi	b,0100h+ALTLEN	;C=137 bytes to write, B=1 byte of 0's at end
@@ -756,13 +839,21 @@ WWAIT5: IN      USBSTAT         ;READY TO WRITE?
 ; wrSec - write physical sector loop
 
 
-wrSec	in	USBSTAT		;read drive status register
+wrSec:
+
+#if defined(USBDATA)
+	in	USBSTAT		;read drive status register
 	ani	40H		;TXE?
 	jnz	wrSec		;no, keep waiting
-	
 	mov	a,e		;put byte to write into accumulator
 	out	USBDATA		;write the byte
-		
+#else
+	in	16		;read drive status register
+	ani	02H		;TXE?
+	jz	wrSec		;no, keep waiting
+	mov	a,e		;put byte to write into accumulator
+	out	17		;write the byte
+#endif
 	mov	e,m		;E=byte to write next time through this loop
 	inx	h		;increment source buffer pointer
 	dcr	c		;decrement chars remaining (bytes just written)
@@ -771,30 +862,39 @@ wrSec	in	USBSTAT		;read drive status register
 ; wrDone - write is done. Now write # of zeros specified in B (just 1)
 
 wrDone:
-;	in	USBSTAT		;wait for another write flag
-;	ANI	40H
-;	jnz	wrDone
 
-	;TODO
-	;mvi	a,0	
-	;out	USBDATA		;write zero b times
-	;dcr	b
-	;jnz	wrDone
-
-wdLoop:	in	USBSTAT
+wdLoop:	
+#if defined(USBDATA)
+	in	USBSTAT
 	ANI	80H
 	JNZ	wdLoop
 	IN	USBDATA		;read status back from seriallink
+#else
+	in	16
+	ANI	01H
+	JZ	wdLoop
+	IN	17		;read status back from seriallink
+#endif
 	ORA	A
 	JNZ	wBad		;error for write
 	
 	xra	a		;return success status
 wBad	ret
 
-flSer:	IN	USBSTAT		;read from serial until empty
+flSer:	
+
+#if defined(USBDATA)
+	IN	USBSTAT		;read from serial until empty
 	ANI	80H
 	JNZ	flSerdn
 	IN	USBDATA
+#else
+	IN	16		;read from serial until empty
+	ANI	01H
+	JZ	flSerdn
+	IN	17
+
+#endif
 	JMP	flSer
 flSerdn:RET
 

@@ -191,7 +191,7 @@ read
 ;----------------------------------------------------------------------------
 rdPSec	dcr	b		;convert 1 indexed sector to 0 indexed
 
-
+#if defined(USBDATA)
 OWAIT1:	IN	USBSTAT
 	ANI	40H
 	JNZ	OWAIT1
@@ -243,6 +243,59 @@ rdLoop	in	USBSTAT		;get drive status byte
 	JNZ	rdLoop
 
 	in	USBDATA		;read the byte 
+#else
+OWAIT1:	IN	16
+	ANI	02H
+	JZ	OWAIT1
+	MVI	A,0FFH		;send the not-the-console-command
+	OUT	17
+
+flSer:  IN      16 	        ;read from serial until empty
+        ANI     01H
+        JZ      flSerdn
+        IN      17
+        JMP     flSer
+flSerdn:
+
+OWAIT2: IN      16	        ;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ      OWAIT2
+        MVI     A,10H           ;send disk read
+        OUT     17
+
+OWAIT3: IN      16	        ;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ     OWAIT3
+        ORA     A               ;set disk 0
+        OUT     17
+
+OWAIT4: IN      16	        ;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ      OWAIT4
+        LDA     TRACK           ;set track num
+        OUT     17
+
+OWAIT5: IN      16	        ;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ      OWAIT5
+        MOV     A,B             ;set sector
+        OUT     17
+
+RWAIT:  IN      16	        ;DATA READY TO READ?
+        ANI     01H             ;READY
+        JZ      RWAIT
+        IN      17	        ;GET STATUS BYTE
+        JNZ     rdBad           ;IF NOT 0 THEN ERROR
+
+	mvi	c,ALTLEN	;C=length of Altair sector (137 bytes)
+	lxi	h,ALTBUF	;HL->ALTBUF
+
+rdLoop	in	16		;get drive status byte
+	ANI	01H		;wait for RXE flag
+	JZ	rdLoop
+
+	in	17		;read the byte 
+#endif
 	mov	m,a		;store in the read buffer
 	inx	h		;increment buffer pointer
 	dcr	c		;decrement characters remaining counter

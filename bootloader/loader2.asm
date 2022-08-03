@@ -22,10 +22,19 @@ start:
 	call	inbyte
 	mov	l,c
 	mov	h,a
-flushlp:in	USBSTAT	;after reading block suck everything off serial until buffer is empty
+flushlp:
+
+#if defined(USBDATA)
+	in	USBSTAT	;after reading block suck everything off serial until buffer is empty
 	ani	080h
 	jnz	flshdn
 	in	USBDATA	
+#else
+	in	16
+	ani	01h
+	jz	flshdn
+	in	17
+#endif
 	jmp	flushlp
 flshdn:	pchl	       ; swap pc and hl to jump to new code
 ;
@@ -60,13 +69,26 @@ loadblp:mov	a,d
 errhand:sta	0000h         ; initiatiate error; store a into 00h
 	shld	0001h	      ; store h and l into 01h and 02h
 	ei
-errlp:	out	USBDATA
+errlp:	
+#if defined(USBDATA)
+	out	USBDATA
+#else
+	out	17
+#endif
 	hlt
 
-inbyte:	in	USBSTAT	
+inbyte:	
+#if defined(USBDATA)
+	in	USBSTAT	
 	ani	080h
 	jnz	inbyte
 	in	USBDATA
+#else
+	in	16
+	ani	01h
+	jz	inbyte
+	in	17
+#endif
 	push	psw
 	add	b	; add to checksum
 	mov	b,a	; store checksum back in b register
