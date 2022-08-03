@@ -3,6 +3,10 @@
 ;	Originally disassembled from DBL tape file
 ;       Modified for disk-over-serial by Don Barber, May 2022
 ;
+
+USBSTAT	equ	0AAh
+USBDATA	equ	0ACh
+
 	org	3f00h
 ;
 	di
@@ -18,10 +22,10 @@ start:
 	call	inbyte
 	mov	l,c
 	mov	h,a
-flushlp:in	0AAh	;after reading block suck everything off serial until buffer is empty
+flushlp:in	USBSTAT	;after reading block suck everything off serial until buffer is empty
 	ani	080h
 	jnz	flshdn
-	in	0ACh
+	in	USBDATA	
 	jmp	flushlp
 flshdn:	pchl	       ; swap pc and hl to jump to new code
 ;
@@ -56,13 +60,13 @@ loadblp:mov	a,d
 errhand:sta	0000h         ; initiatiate error; store a into 00h
 	shld	0001h	      ; store h and l into 01h and 02h
 	ei
-errlp:	out	0ACh
+errlp:	out	USBDATA
 	hlt
 
-inbyte:	in	0AAh
+inbyte:	in	USBSTAT	
 	ani	080h
 	jnz	inbyte
-	in	0ACh
+	in	USBDATA
 	push	psw
 	add	b	; add to checksum
 	mov	b,a	; store checksum back in b register

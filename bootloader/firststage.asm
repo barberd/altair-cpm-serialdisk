@@ -2,6 +2,8 @@
 ;	Bootstrap code to load tape file into 0x3F00
 ;       Modified by Don Barber, May 2022
 
+USBSTAT	equ	0AAh
+USBDATA	equ	0ACh
 
 	org	0h
 
@@ -9,11 +11,11 @@ init:
         lxi H, 03F70H
 
 loop:   lxi SP, stack   ; initialize the stack pointer
-        in 0AAh      ; Look for incoming character
+        in USBSTAT      ; Look for incoming character
         rlc	   ; rotate status bit 7 into carry (0 is byte available)
         rc         ; Loop if status bit is 1
 
-        in 0ACh      ; get the character
+        in USBDATA  ; get the character
         cmp L       ; Is it the same as the value in L?
         rz          ; yes - ignore it and loop back to get another char
         dcr L       ; no - decrement the counter in L
