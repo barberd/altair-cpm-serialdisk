@@ -7,7 +7,7 @@
 USBSTAT	equ	0AAh
 USBDATA	equ	0ACh
 
-	org	3f00h
+	org	1f00h
 ;
 	di
 	lxi     sp,4000h
@@ -96,6 +96,6 @@ inbyte:
 	pop	psw
 	ret
 
-	org	3fc2h
+	org	1fc2h
 	end
 

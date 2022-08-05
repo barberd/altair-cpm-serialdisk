@@ -73,7 +73,7 @@ Move the LIFEBOAT-CPM22-48K.DSK into the cpm directory. Enter the directory and 
 
 Next, go into the bootloader directory and run ./build.sh. This will produce two files of note: firststage.rom and sbl.tap. Move sbl.tap into the serialdrive directory. firststage.rom is the code you'll need to enter into the front panel of the Altair. Run od -b 'firststage.rom' to show it in octal form or 'hexdump -C firststage.rom' to show it in hexadecimal form.
 
-The firststage.rom bootstrap code is the same as that used for Extended BASIC V4.0.
+The firststage.rom bootstrap code is the same as that used for 8K BASIC V4.0.
 
 ## Start up the serialdrive software
 
