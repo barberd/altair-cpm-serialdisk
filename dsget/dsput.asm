@@ -62,7 +62,7 @@ doXfer
 	xra	a		
 	sta	SECTNO		;initialize sector number to zero
 
-	CALL	OPEN$FILE	;OPEN THE FILE
+	CALL	OPENFILE	;OPEN THE FILE
 	lxi	d,mRcv
 
 sendA	MVI	C,PRINT
@@ -130,7 +130,7 @@ WAITNAK	MVI	B,1		;TIMEOUT DELAY
 
 ;READ SECTOR, SEND IT
 
-SENDB	CALL	READ$SECTOR
+SENDB	CALL	READSECTOR
 	LDA	SECTNO		;INCR SECT NO.
 	INR	A
 	STA	SECTNO
@@ -195,14 +195,14 @@ sndSkip	call	SEND
 ; S U B R O U T I N E S
 ;
 ;OPEN FILE
-OPEN$FILE LXI	D,FCB
+OPENFILE LXI	D,FCB
 	MVI	C,OPEN
 	CALL	BDOS
 	INR	A		;OPEN OK?
 	RNZ			;GOOD OPEN
 
 	CALL	ERXIT
-	DB	CR,LF,'Can''t Open File',CR,LF,'$'
+	DB	CR,LF,"Can't Open File",CR,LF,'$'
 
 ; - - - - - - - - - - - - - - -
 ;EXIT PRINTING MESSAGE FOLLOWING 'CALL ERXIT'
@@ -218,7 +218,7 @@ ERXIT	POP	D		;GET MESSAGE
 ;MODEM RECV
 ;-------------------------------------
 RECV	PUSH	D		;SAVE
-MSEC	lxi	d,(124shl 8)	;63 cycles, 8.064ms/wrap*124=1s (2MHz)
+MSEC	lxi	d,(124 << 8)	;63 cycles, 8.064ms/wrap*124=1s (2MHz)
 
 MWTI	
 #if defined(USBDATA)
@@ -303,7 +303,7 @@ snddone	RET
 ;
 ;FILE READ ROUTINE
 ;
-READ$SECTOR:
+READSECTOR:
 	LXI	D,FCB
 	MVI	C,READ
 	CALL	BDOS
@@ -325,7 +325,7 @@ SEOT	MVI	A,EOT
 	JC	EOTTOT		;EOT TIMEOUT
 
 	CPI	ACK
-	JZ	XFER$CPLT
+	JZ	XFERCPLT
 
 ;ACK NOT RECIEVED
 
@@ -351,7 +351,7 @@ RDERR	CALL	ERXIT
 
 ;DONE - CLOSE UP SHOP
 
-XFER$CPLT:
+XFERCPLT:
 	CALL	ERXIT
 	DB	CR,LF,LF,'Transfer Complete',CR,LF,'$'
 
