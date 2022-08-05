@@ -22,10 +22,11 @@ start:
 	call	inbyte
 	mov	l,c
 	mov	h,a
-flushlp:
 
+;After reading block suck everything off serial until buffer is empty
+flushlp:
 #if defined(USBDATA)
-	in	USBSTAT	;after reading block suck everything off serial until buffer is empty
+	in	USBSTAT	
 	ani	080h
 	jnz	flshdn
 	in	USBDATA	
@@ -95,5 +96,6 @@ inbyte:
 	pop	psw
 	ret
 
+	org	3fc2h
 	end
 

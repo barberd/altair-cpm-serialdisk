@@ -63,7 +63,7 @@ I used the zasm assembler to build the software. Conceptually you could use any 
 
 Right now the firstboot.asm, loader2.asm, sbl.asm, boot.asm, bios.asm, and user.asm files are all coded for the s100computers.com Serial IO Card USB port.
 
-By commenting out the USBDATA equate in the files, code for the MITS 2-SIO card with ioport 16 and 17 is used instead.
+By commenting out the USBDATA equate in the files, code for the MITS 2-SIO card with ioport 16 and 17 is used instead. 
 
 ## Build the CPM disk image
 
@@ -72,6 +72,8 @@ Move the LIFEBOAT-CPM22-48K.DSK into the cpm directory. Enter the directory and 
 ## Build the bootloader 'tape' image
 
 Next, go into the bootloader directory and run ./build.sh. This will produce two files of note: firststage.rom and sbl.tap. Move sbl.tap into the serialdrive directory. firststage.rom is the code you'll need to enter into the front panel of the Altair. Run od -b 'firststage.rom' to show it in octal form or 'hexdump -C firststage.rom' to show it in hexadecimal form.
+
+The firststage.rom bootstrap code is the same as that used for Extended BASIC V4.0.
 
 ## Start up the serialdrive software
 

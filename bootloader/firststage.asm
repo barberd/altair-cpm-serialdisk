@@ -17,7 +17,7 @@ USBDATA	equ	0ACh
 #endif
 
 init:   
-        lxi H, 03F70H
+        lxi H, 03FC2H
 
 loop:   lxi SP, stack   ; initialize the stack pointer
 #if defined(USBDATA)
