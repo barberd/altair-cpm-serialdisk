@@ -30,7 +30,7 @@
 MSIZE	equ	48		;memory size in K bytes (0 for relocatable)
 BIOSLEN	equ	0900h		;BIOS length in bytes (Lifeboat Altair)
 USER	equ	0500h		;offset to user area
-CLRTRKS	equ	046Dh		;offset to CLRTRKS in the BIOS
+CLRTRKS	equ	0496h		;offset to CLRTRKS in the BIOS
 CLDDONE	equ	089dh		;offset to CLDDONE flag in the BIOS
 
 ; CP/M size and location equates

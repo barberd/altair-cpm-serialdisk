@@ -964,9 +964,15 @@ CWAIT2: IN      USBSTAT         ;READY TO WRITE?
         MVI     A,0FH           ;send disk check
         OUT     USBDATA
 
-CWAIT3: IN      USBSTAT         ;DATA READY TO READ?
-        ANI     80H             ;READY
+CWAIT3: IN      USBSTAT         ;READY TO WRITE?
+        ANI     40H             ;READY
         JNZ     CWAIT3
+        MOV     A,E           ;send disk to check
+        OUT     USBDATA
+
+CWAIT4: IN      USBSTAT         ;DATA READY TO READ?
+        ANI     80H             ;READY
+        JNZ     CWAIT4
         IN      USBDATA         ;GET STATUS BYTE
 #else
 CWAIT1: IN      16      	;READY TO WRITE?
@@ -983,9 +989,15 @@ CWAIT2: IN      16  	        ;READY TO WRITE?
         MVI     A,0FH           ;send disk check
         OUT     17
 
-CWAIT:  IN      16         ;DATA READY TO READ?
-        ANI     01H             ;READY
+CWAIT3: IN      16  	        ;READY TO WRITE?
+        ANI     02H             ;READY
         JZ      CWAIT3
+        MOV     A,E           ;send disk to check
+        OUT     17
+
+CWAIT4: IN      16         ;DATA READY TO READ?
+        ANI     01H             ;READY
+        JZ      CWAIT4
         IN      17         ;GET STATUS BYTE
 #endif
 	ORA	A	   ;return same byte as received, 0 if no error
