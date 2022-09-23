@@ -17,7 +17,7 @@ oh = open("bootchain.bin","r+b")
 #read boot.bin
 #put first 128 bytes in sector 0 (*128 = 0)
 #put second 128 bytes in sector 2 (*128 = 256)
-with open("BOOT.rom","rb") as ih:
+with open("boot.rom","rb") as ih:
     buf=ih.read(256)
     oh.seek(0)
     oh.write(buf[0:128])
@@ -26,7 +26,7 @@ with open("BOOT.rom","rb") as ih:
 
 #read bios.bin
 #put first 2176 bytes in sector 47-63 (*128 = 6016)
-with open("BIOS.rom","rb") as ih:
+with open("bios.rom","rb") as ih:
     buf=ih.read(2176)
     oh.seek(47*128)
     oh.write(buf)
