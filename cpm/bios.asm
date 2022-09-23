@@ -445,11 +445,9 @@ mntdrv	db	'A'
 ;    in C and then reads the sector specified in B into the buffer
 ;    pointed to by dmaAddr.
 ;----------------------------------------------------------------------------
-readSec	
-	mvi     a,MAXTRY        ;set retry count (5 tries)
-        sta     rtryCnt
-	lda	diskNum
-	sta	selNum
+readSec
+	call	selTrk		;select the drive, seek to proper track
+	rnz			;exit if error
 	
 reReadP	push	b		;save sector number
 
@@ -680,11 +678,8 @@ rBad	ret
 ;    track in C and then writes the sector specified in B from the
 ;    buffer pointed to by dmaAddr.
 ;-----------------------------------------------------------------------------
-wrtSec	
-	mvi     a,MAXTRY        ;set retry count (5 tries)
-        sta     rtryCnt
-	lda	diskNum
-	sta	selNum
+wrtSec	call	selTrk		;select the drive, seek to the proper track
+	rnz			;return if failed
 
 	lda	trkNum		;process data differently depending on track #
 	cpi	6		;tracks 0-5 processed directly below
@@ -937,6 +932,63 @@ altSkew	mov	e,a		;E=input sector number
 	add	e
 	ani	01Fh		;keep lower 5 bits (0-31)
 	mov	e,a	
+	ret
+
+;------------------------------------------------------------------------------
+;  selTrk - select the drive, go to the proper track (specified in diskNum
+;     and C)
+;------------------------------------------------------------------------------
+selTrk	mvi	a,MAXTRY	;set retry count (5 tries)
+        sta     rtryCnt
+	lda	diskNum
+	mov	e,a
+	sta	selNum
+	lda	numDisk
+	cmp	e
+	jc	retErr		; requested drive > numDisk
+
+	;Disk mount check
+
+#if defined(USBDATA)
+CWAIT1: IN      USBSTAT         ;READY TO WRITE?
+        ANI     40H             ;READY
+        JNZ     CWAIT1
+        MVI     A,0FFH           ;send not-the-console command
+        OUT     USBDATA
+
+	CALL	flSer		; flush buffer
+
+CWAIT2: IN      USBSTAT         ;READY TO WRITE?
+        ANI     40H             ;READY
+        JNZ     CWAIT2
+        MVI     A,0FH           ;send disk check
+        OUT     USBDATA
+
+CWAIT3: IN      USBSTAT         ;DATA READY TO READ?
+        ANI     80H             ;READY
+        JNZ     CWAIT3
+        IN      USBDATA         ;GET STATUS BYTE
+#else
+CWAIT1: IN      16      	;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ      CWAIT1
+        MVI     A,0FFH           ;send not-the-console command
+        OUT     17
+
+	CALL	flSer		; flush buffer
+
+CWAIT2: IN      16  	        ;READY TO WRITE?
+        ANI     02H             ;READY
+        JZ      CWAIT2
+        MVI     A,0FH           ;send disk check
+        OUT     17
+
+CWAIT:  IN      16         ;DATA READY TO READ?
+        ANI     01H             ;READY
+        JZ      CWAIT3
+        IN      17         ;GET STATUS BYTE
+#endif
+	ORA	A	   ;return same byte as received, 0 if no error
 	ret
 
 ;------------------------------------------------------------------------------

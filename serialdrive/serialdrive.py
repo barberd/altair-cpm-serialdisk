@@ -145,6 +145,13 @@ class SerialLink(serial.threaded.Protocol):
         if debug:
             sys.stdout.write(" Debug: "+hex(self.readbuffer[0])+" ")
 
+    def disk_check(self):
+        drivenum = self.readbuffer[0]
+        try:
+            with open(self.drives[drivenum],"rb") as fh:
+                self.ser.write(b'\x00') #send successful
+        except:
+            self.ser.write(b'\xFF') #send back error
 
     def disk_read(self):
         #collect drive, track, and sector request, then 
@@ -246,6 +253,9 @@ class SerialLink(serial.threaded.Protocol):
                 pass
             elif data==b'\x03': # reader out
                 pass
+            elif data==b'\x0F': # disk check
+                self.bufferbytes=1
+                self.buffercallback = self.disk_check
             elif data==b'\x10': # disk read
                 self.bufferbytes=3
                 self.buffercallback = self.disk_read
