@@ -147,11 +147,17 @@ class SerialLink(serial.threaded.Protocol):
 
     def disk_check(self):
         drivenum = self.readbuffer[0]
+        if debug:
+            print("\nReceived disk check for drive %i."%(drivenum))
         try:
             with open(self.drives[drivenum],"rb") as fh:
                 self.ser.write(b'\x00') #send successful
+                if debug:
+                    print("\nSending back success.")
         except:
             self.ser.write(b'\xFF') #send back error
+            if debug:
+                print("\nSending back error due to read error.")
 
     def disk_read(self):
         #collect drive, track, and sector request, then 
