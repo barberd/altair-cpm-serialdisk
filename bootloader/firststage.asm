@@ -2,8 +2,8 @@
 ;	Bootstrap code to load tape file into 0x3F00
 ;       Modified by Don Barber, May 2022
 
-USBSTAT	equ	0AAh
-USBDATA	equ	0ACh
+;USBSTAT	equ	0AAh
+;USBDATA	equ	0ACh
 
 	org	0h
 
@@ -12,7 +12,7 @@ USBDATA	equ	0ACh
         MVI     A,3             ; RESET 6850
         OUT     16              ; PROGRAM FOR 8 BITS
         MVI     A,15H           ; 1STOP,NOPARITY, 16X CLOCK
-                                ; NOTE: 2 STOP BITS=11H
+                               ; NOTE: 2 STOP BITS=11H
         OUT     16
 #endif
 

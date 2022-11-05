@@ -4,8 +4,8 @@
 ;       Modified for disk-over-serial by Don Barber, May 2022
 ;
 
-USBSTAT	equ	0AAh
-USBDATA	equ	0ACh
+;USBSTAT	equ	0AAh
+;USBDATA	equ	0ACh
 
 	org	1f00h
 ;

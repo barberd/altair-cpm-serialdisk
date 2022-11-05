@@ -19,8 +19,8 @@
 
 ;  Serial Port Equates
 
-USBSTAT	EQU	0AAh
-USBDATA	EQU	0ACh
+;USBSTAT	EQU	0AAh
+;USBDATA	EQU	0ACh
 
 ; Transfer related equates
 

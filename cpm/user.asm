@@ -104,8 +104,8 @@ DEFIOB	EQU	0		; "I" Default IOBYT
 ; to allow printer time to return to left margin.
 NULLS	EQU	0		; "J" Printer nulls
 
-USBSTAT equ     0AAh
-USBDATA equ     0ACh
+;USBSTAT equ     0AAh
+;USBDATA equ     0ACh
 
 	ORG	USER		; Start of USER AREA
 

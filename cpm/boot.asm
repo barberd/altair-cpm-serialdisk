@@ -30,7 +30,7 @@
 MSIZE	equ	48		;memory size in K bytes (0 for relocatable)
 BIOSLEN	equ	0900h		;BIOS length in bytes (Lifeboat Altair)
 USER	equ	0500h		;offset to user area
-CLRTRKS	equ	0496h		;offset to CLRTRKS in the BIOS
+CLRTRKS	equ	04A0h		;offset to CLRTRKS in the BIOS
 CLDDONE	equ	089dh		;offset to CLDDONE flag in the BIOS
 
 ; CP/M size and location equates
@@ -46,8 +46,8 @@ BOOTLEN	equ	3*128			;3 sectors for boot code
 LOADTK0	equ	CCPBASE-BOOTLEN	 	;load address for track 0
 LOADTK1	equ	LOADTK0 + 01000h	;load address for track 1
 
-USBSTAT	equ	0AAH
-USBDATA	equ	0ACH
+;USBSTAT	equ	0AAH
+;USBDATA	equ	0ACH
 
 ; Disk information equates
 
@@ -214,7 +214,7 @@ OWAIT2: IN      USBSTAT         ;READY TO WRITE?
 OWAIT3: IN      USBSTAT         ;READY TO WRITE?
         ANI     40H             ;READY
         JNZ     OWAIT3
-        ORA     A               ;set disk 0
+        XRA     A               ;set disk 0
         OUT     USBDATA
 
 OWAIT4: IN      USBSTAT         ;READY TO WRITE?
@@ -233,6 +233,7 @@ RWAIT:  IN      USBSTAT         ;DATA READY TO READ?
         ANI     80H             ;READY
         JNZ     RWAIT
         IN      USBDATA         ;GET STATUS BYTE
+	ORA	A
         JNZ     rdBad           ;IF NOT 0 THEN ERROR
 
 	mvi	c,ALTLEN	;C=length of Altair sector (137 bytes)
@@ -266,7 +267,7 @@ OWAIT2: IN      16	        ;READY TO WRITE?
 OWAIT3: IN      16	        ;READY TO WRITE?
         ANI     02H             ;READY
         JZ     OWAIT3
-        ORA     A               ;set disk 0
+        XRA     A               ;set disk 0
         OUT     17
 
 OWAIT4: IN      16	        ;READY TO WRITE?
@@ -285,6 +286,7 @@ RWAIT:  IN      16	        ;DATA READY TO READ?
         ANI     01H             ;READY
         JZ      RWAIT
         IN      17	        ;GET STATUS BYTE
+	ORA	A
         JNZ     rdBad           ;IF NOT 0 THEN ERROR
 
 	mvi	c,ALTLEN	;C=length of Altair sector (137 bytes)

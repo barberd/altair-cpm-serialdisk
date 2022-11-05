@@ -56,8 +56,8 @@ BDOSV	equ	05h		;bdos entry vector location
 CDISK	equ	04h		;CPM current disk
 DEFDMA	equ	80h		;default dma address
 
-USBSTAT EQU     0AAH
-USBDATA EQU     0ACH
+;USBSTAT EQU     0AAH
+;USBDATA EQU     0ACH
 
 ; Disk information equates
 

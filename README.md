@@ -24,16 +24,17 @@ APE and FDC+'s software is Windows only. APE requires two serial ports, and FDC+
 
 # What hardware is used
 
-Right now everything is coded to use the s100computers.com Serial IO board USB port because this is what I have. It would be straightforward to modify the software for other serial cards like a 2SIO card.
+The software is coded for using the 2SIO IO addresses right now. It is straightforward to modify it for other IO cards. For example, if one uncomments the USBDATA/USBSTAT defines, it will use the s100computers.com Serial IO board USB port.
 
 # Quick start
 
 Enter the firststage.rom code into the front panel of the Altair at address 0. The code is:
 
 ```
-041 160 077 061 022 000 333 252 007 330 333 254 275 310 055 167
-300 351 003 000
+076 003 323 020 076 025 323 020 041 302 037 061 032 000 333 020
+017 320 333 021 275 310 055 167 300 351 013 000
 ```
+This sets the 2-SIO card to 9600 8-N-1. Adjust the bootloader/firststage.asm as desired for other settings. Note this is the same as the 8K BASIC 4.0 loader so you can choose to use that instead if you have it in ROM or have the deramp.com Altair 8800c front panel with its code injection capability.
 
 Reset and execute from address 0.
 
@@ -61,9 +62,9 @@ I used the zasm assembler to build the software. Conceptually you could use any 
 
 ## Choose your IO card
 
-Right now the firstboot.asm, loader2.asm, sbl.asm, boot.asm, bios.asm, and user.asm files are all coded for the s100computers.com Serial IO Card USB port.
+Right now the firstboot.asm, loader2.asm, sbl.asm, boot.asm, bios.asm, and user.asm files are all coded for MITS 2-SIO card using IO address 16 and 17 (10h and 11h).
 
-By commenting out the USBDATA equate in the files, code for the MITS 2-SIO card with ioport 16 and 17 is used instead. 
+By uncomment the USBDATA equate in the files, code for the s100computers.com Serial IO card is used instead. 
 
 ## Build the CPM disk image
 
